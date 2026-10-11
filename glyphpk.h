@@ -24,7 +24,7 @@
 #define GPK_METADATA_LEN(count) (GPK_HEADER_LEN + ((size_t)(count) * GPK_ENTRY_LEN))
 
 #ifndef GPK_CACHE_SIZE
-#define GPK_CACHE_SIZE 12
+#define GPK_CACHE_SIZE 8
 #endif
 
 #ifndef GPK_LOOKUP_CHUNK_SIZE

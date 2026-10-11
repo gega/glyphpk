@@ -1,0 +1,3 @@
+[submodule "qli"]
+	path = qli
+	url = https://github.com/gega/qli.git
