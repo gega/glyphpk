@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define GPK_GENERATOR 1
 #define GPK_IMPLEMENTATION
 #include "glyphpk.h"
 

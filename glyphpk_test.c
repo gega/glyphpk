@@ -3,6 +3,7 @@
 
 #define GPK_CACHE_SIZE 2
 #define GPK_LOOKUP_CHUNK_SIZE 5
+#define GPK_GENERATOR 1
 #define GPK_IMPLEMENTATION
 #include "glyphpk.h"
 

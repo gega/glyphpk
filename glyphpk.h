@@ -27,6 +27,10 @@
 #define GPK_CACHE_SIZE 8
 #endif
 
+#ifndef GPK_GENERATOR
+#define GPK_GENERATOR 0
+#endif
+
 #ifndef GPK_LOOKUP_CHUNK_SIZE
 #define GPK_LOOKUP_CHUNK_SIZE 64u
 #endif
@@ -80,6 +84,7 @@ struct gpk_lookup
   uint32_t read_offset; /* relative to the beginning of the GPK blob */
 };
 
+#if GPK_GENERATOR != 0
 /* Writer-side description. The writer should append glyph blobs in exactly
  * this order immediately after the generated metadata.
  */
@@ -89,6 +94,7 @@ struct gpk_write_glyph
   uint8_t width;
   uint16_t length;
 };
+#endif
 
 /* Decode the fixed GPK header. buf must contain at least GPK_HEADER_LEN bytes. */
 int gpk_init(struct gpk_font *font, const uint8_t *buf, size_t size);
@@ -104,11 +110,10 @@ int gpk_lookup_init(const struct gpk_font *font, uint8_t glyph_id, struct gpk_lo
  *   lookup->read_offset  offset at which the caller should read
  *   lookup->want         suggested number of bytes to read
  *
- * Subsequent calls may supply any number of bytes. Entry boundaries do not
- * need to match buffer boundaries.
  */
 int gpk_lookup_next(struct gpk_font *font, struct gpk_lookup *lookup, const uint8_t *buf, size_t size);
 
+#if GPK_GENERATOR != 0
 /* Generate the complete fixed header + glyph metadata table.
  *
  * Offsets are generated assuming that glyph blobs are appended immediately
@@ -116,6 +121,7 @@ int gpk_lookup_next(struct gpk_font *font, struct gpk_lookup *lookup, const uint
  * generated, or -1 on error.
  */
 int gpk_generate_header(uint8_t *buf, size_t bufsize, uint8_t height, const struct gpk_write_glyph *glyphs, uint8_t count);
+#endif
 
 #endif /* GPK_H */
 
@@ -123,12 +129,12 @@ int gpk_generate_header(uint8_t *buf, size_t bufsize, uint8_t height, const stru
 
 #include <string.h>
 
-static uint16_t gpk_get_be16(const uint8_t *p)
+static inline uint16_t gpk_get_be16(const uint8_t *p)
 {
   return (uint16_t)(((uint16_t)p[0] << 8) | p[1]);
 }
 
-static uint32_t gpk_get_be32(const uint8_t *p)
+static inline uint32_t gpk_get_be32(const uint8_t *p)
 {
   return ((uint32_t)p[0] << 24) |
          ((uint32_t)p[1] << 16) |
@@ -136,6 +142,7 @@ static uint32_t gpk_get_be32(const uint8_t *p)
           (uint32_t)p[3];
 }
 
+#if GPK_GENERATOR != 0
 static void gpk_put_be16(uint8_t *p, uint16_t v)
 {
   p[0] = (uint8_t)(v >> 8);
@@ -149,6 +156,7 @@ static void gpk_put_be32(uint8_t *p, uint32_t v)
   p[2] = (uint8_t)((v >> 8) & 0xffu);
   p[3] = (uint8_t)(v & 0xffu);
 }
+#endif
 
 static void gpk_parse_entry(struct gpk_glyph *g, const uint8_t *p)
 {
@@ -314,6 +322,7 @@ int gpk_lookup_next(struct gpk_font *font, struct gpk_lookup *lookup,
   return GPK_MORE;
 }
 
+#if GPK_GENERATOR != 0
 int gpk_generate_header(uint8_t *buf, size_t bufsize, uint8_t height, const struct gpk_write_glyph *glyphs, uint8_t count)
 {
   size_t metadata_len;
@@ -362,5 +371,6 @@ int gpk_generate_header(uint8_t *buf, size_t bufsize, uint8_t height, const stru
 
   return (int)metadata_len;
 }
+#endif
 
 #endif
